@@ -24,11 +24,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Install Gradle 8.7
+      - name: Install Gradle 8.9
         run: |
-          wget https://services.gradle.org/distributions/gradle-8.7-bin.zip
-          unzip -q gradle-8.7-bin.zip
-          echo "$GITHUB_WORKSPACE/gradle-8.7/bin" >> "$GITHUB_PATH"
+          wget https://services.gradle.org/distributions/gradle-8.9-bin.zip
+          unzip -q gradle-8.9-bin.zip
+          echo "$GITHUB_WORKSPACE/gradle-8.9/bin" >> "$GITHUB_PATH"
 
       - name: Build APK
         run: gradle assembleDebug
@@ -38,3 +38,4 @@ jobs:
         with:
           name: Kestrel7-APK
           path: app/build/outputs/apk/debug/app-debug.apk
+          
