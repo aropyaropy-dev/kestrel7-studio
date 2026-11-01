@@ -1,0 +1,13 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.kestrel7.studio'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.kestrel7.studio'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+    }
+}
