@@ -1,4 +1,3 @@
-name: Extract Android Project
 
 name: Extract Kestrel7 V3 Project
 
@@ -61,10 +60,5 @@ jobs:
 
           git add -A
           git commit -m "Extract Kestrel7 Adult V3 project" || true
-          git push
-          .gradle gradle.properties settings.gradle
-
-          git commit -m "Add Kestrel Android project" || true
-
           git push
           
