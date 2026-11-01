@@ -1,5 +1,7 @@
 name: Extract Android Project
 
+name: Extract Kestrel7 V3 Project
+
 on:
   workflow_dispatch:
 
@@ -14,11 +16,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install unzip
-        run: sudo apt-get update && sudo apt-get install -y unzip
-
-      - name: Extract Android project
+      - name: Extract project ZIP
         run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip rsync
+
           mkdir -p temp
 
           ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" -print -quit)
@@ -30,21 +32,37 @@ jobs:
 
           unzip -o "$ZIP_FILE" -d temp
 
-          PROJECT_DIR=$(find temp -name settings.gradle -print -quit | xargs dirname)
+          SETTINGS_FILE=$(find temp -name settings.gradle -print -quit)
 
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "File settings.gradle tidak ditemukan"
+          if [ -z "$SETTINGS_FILE" ]; then
+            echo "settings.gradle tidak ditemukan"
             exit 1
           fi
 
-          rsync -a --exclude='.github/' "$PROJECT_DIR"/ ./
+          ANDROID_DIR=$(dirname "$SETTINGS_FILE")
+          PROJECT_ROOT=$(dirname "$ANDROID_DIR")
 
-      - name: Save Android files
+          rsync -a --exclude='.github/' "$ANDROID_DIR"/ ./
+
+          if [ -d "$PROJECT_ROOT/backend" ]; then
+            mkdir -p backend
+            rsync -a "$PROJECT_ROOT/backend"/ backend/
+          else
+            echo "Folder backend tidak ditemukan"
+            exit 1
+          fi
+
+          rm -rf temp
+
+      - name: Save project files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add app build.gradle gradle.properties settings.gradle
+          git add -A
+          git commit -m "Extract Kestrel7 Adult V3 project" || true
+          git push
+          .gradle gradle.properties settings.gradle
 
           git commit -m "Add Kestrel Android project" || true
 
