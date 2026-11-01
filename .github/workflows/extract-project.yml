@@ -15,43 +15,54 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract project ZIP
+      - name: Install tools
         run: |
           sudo apt-get update
           sudo apt-get install -y unzip rsync
 
-          mkdir -p temp
+      - name: Extract V3 project
+        run: |
+          set -e
 
-          ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" -print -quit)
+          ZIP_FILE="./Kestrel7_Studio_Adult_v3.zip"
 
-          if [ -z "$ZIP_FILE" ]; then
-            echo "ZIP project tidak ditemukan"
+          if [ ! -f "$ZIP_FILE" ]; then
+            echo "ERROR: ZIP V3 tidak ditemukan!"
+            echo "Daftar ZIP:"
+            find . -maxdepth 1 -name "*.zip"
             exit 1
           fi
 
+          mkdir -p temp
           unzip -o "$ZIP_FILE" -d temp
 
           SETTINGS_FILE=$(find temp -name settings.gradle -print -quit)
 
           if [ -z "$SETTINGS_FILE" ]; then
-            echo "settings.gradle tidak ditemukan"
+            echo "ERROR: settings.gradle tidak ditemukan"
             exit 1
           fi
 
           ANDROID_DIR=$(dirname "$SETTINGS_FILE")
           PROJECT_ROOT=$(dirname "$ANDROID_DIR")
 
-          rsync -a --exclude='.github/' "$ANDROID_DIR"/ ./
-
-          if [ -d "$PROJECT_ROOT/backend" ]; then
-            mkdir -p backend
-            rsync -a "$PROJECT_ROOT/backend"/ backend/
-          else
-            echo "Folder backend tidak ditemukan"
+          if [ ! -d "$PROJECT_ROOT/backend" ]; then
+            echo "ERROR: Folder backend tidak ditemukan"
+            find temp -maxdepth 3 -type d
             exit 1
           fi
 
+          echo "Menyalin proyek Android..."
+          rsync -a --exclude='.github/' "$ANDROID_DIR"/ ./
+
+          echo "Menyalin backend..."
+          mkdir -p backend
+          rsync -a "$PROJECT_ROOT/backend"/ backend/
+
+          echo "Membersihkan file sementara..."
           rm -rf temp
+
+          echo "Proyek V3 berhasil diekstrak"
 
       - name: Save project files
         run: |
